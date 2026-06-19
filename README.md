@@ -37,6 +37,15 @@ git push -u origin main
 
 ---
 
+## 📱 PWA — Installation & hors-ligne
+
+L'application est une **Progressive Web App** : elle peut être installée comme une vraie application (icône sur l'écran d'accueil/bureau, sans barre d'adresse) et fonctionne **hors-ligne** une fois chargée une première fois.
+
+- **Sur mobile** (Android/iOS) : ouvrir le site → menu navigateur → "Ajouter à l'écran d'accueil" / "Installer l'application"
+- **Sur desktop** (Chrome/Edge) : une icône d'installation apparaît dans la barre d'adresse
+
+Comme l'app ne dépend d'aucune API externe, le mode hors-ligne est totalement fiable une fois le premier chargement effectué.
+
 ## 💾 Données et confidentialité
 
 Toutes les données (revenus, dépenses, catégories) sont stockées **uniquement dans le navigateur** via `localStorage` — rien n'est envoyé à un serveur. Chaque appareil/navigateur a ses propres données.
@@ -47,7 +56,12 @@ Toutes les données (revenus, dépenses, catégories) sont stockées **uniquemen
 
 ```
 MonBudget/
-├── index.html     ← Application complète (HTML/CSS/JS, fichier unique)
-├── _headers       ← En-têtes de sécurité Cloudflare Pages
+├── index.html         ← Application complète (HTML/CSS/JS, fichier unique)
+├── manifest.json       ← Manifeste PWA (nom, icônes, couleurs)
+├── sw.js                ← Service worker (cache hors-ligne)
+├── icon-192.png
+├── icon-512.png
+├── icon-maskable.png
+├── _headers             ← En-têtes de sécurité Cloudflare Pages
 └── README.md
 ```
