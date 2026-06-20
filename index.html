@@ -51,7 +51,12 @@
 }
 *, *::before, *::after { transition: background-color 0.35s ease, border-color 0.35s ease, color 0.2s ease, box-shadow 0.35s ease !important; }
 /* Theme toggle button */
+.menu-toggle { display: none; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); width: 36px; height: 36px; border-radius: 8px; font-size: 18px; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; }
+.sidebar-backdrop.open { display: block; }
+.topbar-period { display:flex; align-items:center; gap:8px; background:var(--bg3); border:1px solid var(--border2); border-radius:10px; padding:5px 10px; justify-content:center; }
 .theme-toggle { display:flex; align-items:center; gap:8px; padding:10px 14px; margin:8px 10px 0; border-radius:10px; background:var(--bg3); border:1px solid var(--border2); cursor:pointer; width:calc(100% - 20px); }
+
 .theme-toggle-track { width:36px; height:20px; border-radius:10px; background:var(--bg4); border:1px solid var(--border2); position:relative; flex-shrink:0; transition:background 0.3s !important; }
 :root.light .theme-toggle-track { background: linear-gradient(135deg,#fde68a,#f97316); border-color:#f97316; }
 :root:not(.light) .theme-toggle-track { background: linear-gradient(135deg,#312e81,#4f46e5); border-color:#4f46e5; }
@@ -412,12 +417,63 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .avg-table tr.avg-total td { background:var(--bg3); font-weight:700; border-top:1px solid var(--border2); }
 .avg-mini-bar { display:inline-block; height:4px; border-radius:2px; vertical-align:middle; margin-left:6px; }
 
+/* ============ RESPONSIVE — TABLETTE (≤1024px) ============ */
+@media (max-width: 1024px) {
+  .menu-toggle { display: flex; }
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: 8px 0 30px rgba(0,0,0,0.4);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar .nav-item { padding: 12px 14px; font-size: 14px; }
+  .cards-row { grid-template-columns: repeat(2, 1fr) !important; }
+  .topbar {
+    display: flex; flex-wrap: wrap; height: auto;
+    padding: 10px 14px; gap: 10px; row-gap: 10px; align-items: center;
+  }
+  .topbar-actions { flex-basis: 100%; flex-wrap: wrap; justify-content: flex-start; }
+}
+
+/* ============ RESPONSIVE — MOBILE (≤640px) ============ */
+@media (max-width: 640px) {
+  .topbar {
+    display: flex; flex-wrap: wrap; height: auto;
+    padding: 10px 12px; gap: 8px; row-gap: 8px;
+  }
+  .topbar-title { font-size: 14px; order: 1; flex: 1; }
+  .topbar-period { order: 3; flex-basis: 100%; padding: 5px 6px; }
+  .topbar-period #month-label { min-width: 78px !important; font-size: 12px !important; }
+  .topbar-actions { order: 4; flex-basis: 100%; flex-wrap: wrap; justify-content: flex-start; gap: 6px; }
+  .topbar-actions .btn, .topbar-actions .btn-danger, .topbar-actions .btn.primary {
+    flex: 1 1 auto; font-size: 12px; padding: 8px 10px; white-space: nowrap;
+  }
+  .content { padding: 12px; }
+  .cards-row { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+  .card { padding: 12px 14px; }
+  .card-value { font-size: 19px; }
+  .two-col, .global-grid, .global-detail, .gm-cards, .annual-pie-row { grid-template-columns: 1fr !important; }
+  .cat-manager-grid { grid-template-columns: 1fr; gap: 12px; }
+  .modal { width: 92vw; max-width: 400px; max-height: 88vh; overflow-y: auto; padding: 18px; }
+  .income-input { width: 100px; }
+  .sub-add-row { flex-wrap: wrap; }
+  .sub-add-btn { flex: 1 1 auto; }
+  .sub-add-input { flex: 1 1 140px; }
+  .cat-table, .hist-table, .month-table {
+    display: block; overflow-x: auto; white-space: nowrap;
+  }
+  .modal-btns { flex-wrap: wrap; }
+  .modal-btns .btn { flex: 1 1 100%; }
+  .panel svg, .pie-wrap svg, .card svg, .savings-card svg { max-width: 100%; height: auto; display: block; }
+}
 </style>
 </head>
 <body>
 
 <div class="layout">
-  <div class="sidebar">
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-logo">Mon<span>Budget</span></div>
     <div class="sidebar-nav">
       <div class="nav-section">Navigation</div>
@@ -442,8 +498,9 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 
   <div class="main">
     <div class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()" title="Menu" aria-label="Ouvrir le menu">&#9776;</button>
       <div class="topbar-title" id="view-title">Tableau de bord</div>
-      <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:5px 10px;justify-content:center;">
+      <div class="topbar-period" style="">
         <div class="month-nav" style="gap:4px">
           <button onclick="changeYear(-1)" style="width:24px;height:24px;font-size:14px">&#8249;</button>
           <span id="year-label" style="font-size:14px;font-weight:800;color:var(--blue);min-width:36px;text-align:center"></span>
@@ -655,6 +712,14 @@ function changeMonth(d){
   renderAll();
 }
 
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-backdrop').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-backdrop').classList.remove('open');
+}
 function showView(name,btn){
   activeView=name;
   ['dashboard','history','global','categories'].forEach(t=>document.getElementById('view-'+t).style.display=t===name?'':'none');
@@ -667,6 +732,7 @@ function showView(name,btn){
   const exportBtn=document.getElementById('btn-export-pdf');
   if(exportBtn) exportBtn.style.display=name==='categories'?'none':'';
   if(name==='categories') renderCategoriesView();
+  if(window.innerWidth<=1024) closeSidebar();
 }
 
 function scrollToCat(id){
@@ -1261,7 +1327,7 @@ function renderGlobal(){
       .map(cat=>`<div class="trend-leg-item${trendActiveLine&&trendActiveLine!==cat.id?' faded':''}" onclick="setTrendLine('${cat.id}')"><div class="trend-leg-dot" style="background:${cat.color}"></div>${cat.icon} ${cat.label}</div>`).join('');
     const trendLegendTotal=`<div class="trend-leg-item" style="opacity:0.5"><div class="trend-leg-dot" style="background:#4a5068"></div>Total</div>`;
 
-    h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    h+=`<div class="annual-pie-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div class="pie-wrap">
         <div class="pie-title">Dépenses par catégorie — ${y}</div>
         ${annPT===0?'<div class="pie-empty">Aucune dépense</div>':annSvg}
